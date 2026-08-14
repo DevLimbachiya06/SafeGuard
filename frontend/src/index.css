@@ -1,0 +1,854 @@
+:root {
+  --bg: #07111d;
+  --bg-2: #0c1828;
+  --panel: rgba(12, 22, 36, 0.82);
+  --panel-strong: rgba(11, 20, 32, 0.95);
+  --border: rgba(141, 169, 214, 0.15);
+  --text: #eef4ff;
+  --muted: #99a7be;
+  --accent: #ff5d4f;
+  --accent-2: #33d3c0;
+  --accent-3: #ffcb5b;
+  --accent-4: #78a9ff;
+  --shadow: 0 30px 80px rgba(1, 5, 12, 0.45);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  color: var(--text);
+  font-family: "Space Grotesk", system-ui, sans-serif;
+  background:
+    radial-gradient(circle at 10% 10%, rgba(51, 211, 192, 0.14), transparent 28%),
+    radial-gradient(circle at 88% 18%, rgba(255, 93, 79, 0.16), transparent 30%),
+    radial-gradient(circle at 50% 100%, rgba(120, 169, 255, 0.12), transparent 34%),
+    linear-gradient(180deg, var(--bg), var(--bg-2));
+  min-height: 100vh;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+a {
+  color: inherit;
+}
+
+.app-shell {
+  position: relative;
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+.app-shell::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+  background-size: 84px 84px;
+  mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.65), transparent 100%);
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+.page {
+  position: relative;
+  z-index: 1;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18px 20px;
+  border: 1px solid var(--border);
+  border-radius: 22px;
+  background: rgba(10, 18, 29, 0.75);
+  backdrop-filter: blur(18px);
+  box-shadow: var(--shadow);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.brand-logo {
+  width: 46px;
+  height: 46px;
+  border-radius: 16px;
+  object-fit: contain;
+  display: block;
+  background: rgba(255, 255, 255, 0.04);
+  box-shadow: 0 0 0 6px rgba(255, 93, 79, 0.1);
+}
+
+.brand-mark {
+  width: 46px;
+  height: 46px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, rgba(255, 93, 79, 0.9), rgba(255, 203, 91, 0.9));
+  box-shadow: 0 0 0 6px rgba(255, 93, 79, 0.1);
+}
+
+.brand h1,
+.hero h2,
+.section h3,
+.panel h4,
+.modal h2 {
+  margin: 0;
+}
+
+.brand h1 {
+  font-size: 1.2rem;
+}
+
+.brand p,
+.subtle,
+.metric small,
+.meta,
+.section-copy,
+.muted,
+.dock-item small,
+.row-note,
+.mini,
+.modal p,
+.field label,
+.feed-item span,
+.zone-note,
+.planner small {
+  color: var(--muted);
+}
+
+.brand p,
+.subtle,
+.section-copy,
+.muted,
+.meta,
+.mini,
+.feed-item span,
+.planner small {
+  font-size: 0.9rem;
+}
+
+.chip,
+.pill,
+.status-chip,
+.badge,
+.cta,
+.icon-btn,
+.field select,
+.field input,
+.field textarea,
+.action-btn,
+.login-btn,
+.sos-btn,
+.segmented button {
+  border-radius: 999px;
+}
+
+.chip,
+.pill,
+.status-chip,
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  font-family: "IBM Plex Mono", monospace;
+  letter-spacing: 0.06em;
+  font-size: 0.74rem;
+  text-transform: uppercase;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.pill {
+  background: rgba(51, 211, 192, 0.13);
+  color: #a7fff4;
+}
+
+.status-chip {
+  background: rgba(255, 255, 255, 0.05);
+  color: #d7e1f5;
+}
+
+.cta,
+.icon-btn,
+.action-btn,
+.login-btn,
+.segmented button {
+  border: 1px solid transparent;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.cta,
+.login-btn,
+.action-btn,
+.sos-btn {
+  padding: 12px 16px;
+  font-weight: 700;
+}
+
+.cta.primary,
+.sos-btn {
+  background: linear-gradient(135deg, var(--accent), #ff8a61);
+  color: #170b08;
+}
+
+.cta.secondary,
+.login-btn.secondary,
+.action-btn.secondary {
+  border-color: rgba(120, 169, 255, 0.25);
+  background: rgba(120, 169, 255, 0.08);
+}
+
+.hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  margin-top: 22px;
+  align-items: stretch;
+  gap: 20px;
+}
+
+.hero-main,
+.hero-side,
+.panel,
+.card,
+.modal,
+.section,
+.map-card,
+.timeline,
+.command-card,
+.dock-card,
+.login-card,
+.sos-card,
+.route-card,
+.alert-card {
+  border: 1px solid var(--border);
+  background: var(--panel);
+  border-radius: 24px;
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(18px);
+}
+
+.hero-main {
+  padding: 28px;
+  min-width: 0;
+}
+
+.hero-side {
+  padding: 24px;
+  background: linear-gradient(160deg, rgba(12, 22, 36, 0.95), rgba(12, 22, 36, 0.7));
+  min-width: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.hero h2 {
+  font-size: clamp(2.2rem, 3.4vw, 4rem);
+  line-height: 0.97;
+  max-width: 12ch;
+}
+
+.hero p {
+  max-width: 62ch;
+  color: var(--muted);
+  font-size: 1rem;
+  line-height: 1.7;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin-top: 18px;
+  gap: 12px;
+}
+
+.hero-actions,
+.alerts-grid,
+.modal-actions,
+.action-row,
+.dock-row {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.two-col,
+.three-col,
+.panel-grid,
+.section-grid,
+.command-strip,
+.risk-grid,
+.info-grid {
+  display: grid;
+  gap: 20px;
+  width: 100%;
+}
+
+.two-col {
+  grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+}
+
+.three-col {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.panel-grid,
+.section-grid,
+.command-strip {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.risk-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.info-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.login-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.modal-actions {
+  display: flex;
+}
+
+.metric,
+.stat,
+.tile,
+.mini-card,
+.coord-card,
+.feed-item,
+.route-step,
+.zone-card,
+.alert-item,
+.summary-card {
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.metric,
+.stat,
+.summary-card {
+  padding: 16px;
+}
+
+.hero-side .summary-card {
+  min-width: 0;
+}
+
+.metric strong,
+.summary-card strong,
+.dock-item strong,
+.tile strong,
+.route-step strong {
+  display: block;
+  font-size: 1.7rem;
+  margin-bottom: 4px;
+}
+
+.metric small,
+.stat small,
+.summary-card small,
+.dock-item small,
+.route-step small {
+  font-family: "IBM Plex Mono", monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.68rem;
+}
+
+.status-row {
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 18px;
+}
+
+.live-strip {
+  margin-top: 16px;
+  padding: 12px 14px;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(0, 0, 0, 0.18);
+  overflow: hidden;
+}
+
+.ticker {
+  display: flex;
+  gap: 24px;
+  white-space: nowrap;
+  animation: ticker 26s linear infinite;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.78rem;
+}
+
+.hero-side {
+  min-width: 360px;
+}
+
+.map-card {
+  padding: 18px;
+  min-height: 520px;
+}
+
+.map-head,
+.section-head,
+.panel-head,
+.dock-head,
+.modal-head,
+.planner-head,
+.field-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+
+.map-surface {
+  position: relative;
+  margin-top: 16px;
+  width: 100%;
+  height: clamp(430px, 52vh, 560px);
+  border-radius: 22px;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 20% 20%, rgba(51, 211, 192, 0.14), transparent 20%),
+    radial-gradient(circle at 85% 18%, rgba(255, 93, 79, 0.14), transparent 18%),
+    linear-gradient(180deg, rgba(4, 11, 19, 0.92), rgba(8, 16, 28, 0.98));
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.leaflet-live-map,
+.map-surface .leaflet-container {
+  width: 100%;
+  height: 100%;
+  border-radius: 22px;
+}
+
+.map-surface .leaflet-tile-pane {
+  filter: saturate(0.95) contrast(1.05) brightness(0.88);
+}
+
+.map-surface .leaflet-popup-content-wrapper,
+.map-surface .leaflet-popup-tip {
+  background: rgba(7, 13, 24, 0.94);
+  color: #eaf1ff;
+}
+
+.map-surface .leaflet-tooltip {
+  background: rgba(10, 18, 31, 0.92);
+  color: #eaf1ff;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  box-shadow: 0 14px 24px rgba(0, 0, 0, 0.25);
+}
+
+.map-legend {
+  position: absolute;
+  z-index: 700;
+  left: 14px;
+  bottom: 14px;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(5, 12, 22, 0.78);
+  backdrop-filter: blur(8px);
+  font-size: 0.74rem;
+  letter-spacing: 0.04em;
+}
+
+.map-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.legend-dot.incident {
+  background: #ff5d4f;
+}
+
+.legend-dot.responder {
+  background: #78a9ff;
+}
+
+.legend-dot.hospital {
+  background: #33d3c0;
+}
+
+.svg-label {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.section {
+  margin-top: 22px;
+  padding: 20px;
+}
+
+.section-grid,
+.two-col,
+.three-col,
+.panel-grid {
+  display: grid;
+}
+
+.two-col {
+  grid-template-columns: 1.3fr 1fr;
+}
+
+.three-col {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.section-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.panel-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.panel,
+.card,
+.timeline,
+.command-card,
+.dock-card,
+.login-card,
+.sos-card,
+.route-card,
+.alert-card {
+  padding: 18px;
+  min-width: 0;
+}
+
+.panel h4,
+.section h3,
+.alert-card h4,
+.route-card h4,
+.command-card h4,
+.dock-card h4 {
+  font-size: 1.12rem;
+}
+
+.list,
+.feed,
+.zone-list,
+.alert-list,
+.dock-list {
+  display: grid;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.feed-item,
+.alert-item,
+.zone-card,
+.route-step,
+.dock-item {
+  padding: 14px;
+}
+
+.feed-item,
+.alert-item,
+.dock-item,
+.route-step {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  align-items: flex-start;
+}
+
+.feed-item strong,
+.alert-item strong,
+.dock-item strong,
+.zone-card strong,
+.route-step strong {
+  display: block;
+}
+
+.mono,
+.code,
+.signal {
+  font-family: "IBM Plex Mono", monospace;
+}
+
+.code,
+.signal {
+  font-size: 0.82rem;
+  line-height: 1.6;
+}
+
+.code {
+  padding: 14px;
+  border-radius: 16px;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.risk-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.risk-card {
+  padding: 14px;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.risk-bar {
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+  margin-top: 12px;
+}
+
+.risk-bar span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--accent-2), var(--accent-3), var(--accent));
+}
+
+.field {
+  display: grid;
+  gap: 8px;
+}
+
+.field input,
+.field select,
+.field textarea {
+  width: 100%;
+  padding: 13px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  background: rgba(0, 0, 0, 0.22);
+  color: var(--text);
+}
+
+.field textarea {
+  min-height: 98px;
+  resize: vertical;
+  border-radius: 18px;
+}
+
+.command-strip {
+  align-items: stretch;
+}
+
+.command-card,
+.dock-card {
+  flex: 1;
+}
+
+.login-overlay {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: rgba(4, 8, 14, 0.75);
+  backdrop-filter: blur(18px);
+  z-index: 20;
+  padding: 24px;
+}
+
+.auth-shell {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  z-index: 20;
+}
+
+.splash-card {
+  width: min(520px, 100%);
+  padding: 30px 26px;
+  border-radius: 24px;
+  border: 1px solid var(--border);
+  background: var(--panel-strong);
+  backdrop-filter: blur(18px);
+  box-shadow: var(--shadow);
+  display: grid;
+  justify-items: center;
+  text-align: center;
+  gap: 10px;
+}
+
+.splash-card .brand-logo {
+  width: 72px;
+  height: 72px;
+  border-radius: 20px;
+}
+
+.splash-card h1 {
+  margin: 4px 0 0;
+  font-size: clamp(1.6rem, 2.5vw, 2.1rem);
+}
+
+.splash-card p {
+  margin: 0;
+  color: var(--muted);
+}
+
+.modal,
+.login-card {
+  width: min(560px, 100%);
+  padding: 24px;
+}
+
+.login-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+.login-form .field:last-child {
+  grid-column: 1 / -1;
+}
+
+.toast {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 30;
+  min-width: 280px;
+  max-width: min(92vw, 420px);
+  padding: 14px 16px;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(8, 16, 28, 0.94);
+  box-shadow: var(--shadow);
+}
+
+.toast strong {
+  display: block;
+  margin-bottom: 6px;
+}
+
+.mobile-hide {
+  display: inline-flex;
+}
+
+@keyframes ticker {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@media (max-width: 1080px) {
+  .hero,
+  .two-col,
+  .three-col,
+  .section-grid,
+  .risk-grid,
+  .panel-grid,
+  .stats-grid,
+  .command-strip {
+    grid-template-columns: 1fr 1fr;
+    display: grid;
+  }
+
+  .hero {
+    grid-template-columns: 1fr;
+  }
+
+  .hero-side {
+    min-width: 0;
+    grid-template-columns: 1fr;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  .page {
+    padding: 14px;
+  }
+
+  .topbar,
+  .map-head,
+  .section-head,
+  .panel-head,
+  .dock-head,
+  .modal-head,
+  .planner-head,
+  .field-head,
+  .feed-item,
+  .alert-item,
+  .dock-item,
+  .route-step,
+  .status-row,
+  .command-strip,
+  .hero-actions,
+  .modal-actions,
+  .action-row,
+  .dock-row,
+  .login-form {
+    flex-direction: column;
+  }
+
+  .section-grid,
+  .two-col,
+  .three-col,
+  .risk-grid,
+  .panel-grid,
+  .stats-grid,
+  .login-form {
+    grid-template-columns: 1fr;
+  }
+
+  .mobile-hide {
+    display: none;
+  }
+
+  .map-surface {
+    height: 360px;
+  }
+}
