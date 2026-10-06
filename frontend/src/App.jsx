@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { io } from "socket.io-client";
 import { Circle, CircleMarker, MapContainer, Popup, TileLayer, Tooltip } from "react-leaflet";
+import ProfileMenu from "./components/ProfileMenu";
 
 const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:8080/api";
 const SOCKET_URL = API_BASE.replace(/\/api\/?$/, "");
@@ -480,6 +481,11 @@ export default function App() {
     sessionStorage.removeItem("safeguard-user");
     storage.setItem("safeguard-token", payload.token);
     storage.setItem("safeguard-user", JSON.stringify(payload.user));
+    const storedAccounts = JSON.parse(localStorage.getItem("safeguard-accounts") || "[]");
+    localStorage.setItem("safeguard-accounts", JSON.stringify([
+      payload.user,
+      ...storedAccounts.filter((account) => account.id !== payload.user.id),
+    ]));
     setToken(payload.token);
     setUser(payload.user);
     setStage("app");
@@ -558,6 +564,27 @@ export default function App() {
     setUser(null);
     setStage("login");
     setMessage({ tone: "info", title: "Signed out", text: "Please sign in again to continue." });
+  };
+
+  const updateProfile = (nextUser) => {
+    setUser(nextUser);
+    localStorage.setItem("safeguard-user", JSON.stringify(nextUser));
+    if (nextUser.id) {
+      const stored = JSON.parse(localStorage.getItem("safeguard-accounts") || "[]");
+      localStorage.setItem("safeguard-accounts", JSON.stringify([
+        nextUser,
+        ...stored.filter((account) => account.id !== nextUser.id),
+      ]));
+    }
+  };
+
+  const switchAccount = (account) => {
+    if (account && account.id === user?.id) {
+      setMessage({ tone: "info", title: "Account already active", text: "This operator profile is currently in use." });
+      return;
+    }
+    setStage("login");
+    setMessage({ tone: "info", title: "Account switch requested", text: account ? `Sign in to continue as ${account.name}.` : "Enter credentials for another authorized account." });
   };
 
   const dispatchIncident = async () => {
@@ -688,9 +715,7 @@ export default function App() {
             <span className="status-chip">Active: {summary.activeIncidents}</span>
             <span className="status-chip">RVTS: {summary.rvtsWarnings}</span>
             <span className="status-chip mobile-hide">Coverage: {summary.coveragePct}%</span>
-            {user ? <span className="status-chip user-chip"><span className="avatar">{user.name?.slice(0, 1)}</span><span>{user.name}</span><small>{roleLabels[user.role] || user.role}</small></span> : null}
-            <button className="cta secondary" onClick={() => setStage("login")}>{token ? "Switch account" : "Sign in"}</button>
-            {token ? <button className="cta" onClick={signOut}>Sign out</button> : null}
+            {user ? <ProfileMenu user={user} onUpdate={updateProfile} onSwitchAccount={switchAccount} onSignOut={signOut} onNotify={(title, text) => setMessage({ tone: "success", title, text })} /> : <button className="cta secondary" onClick={() => setStage("login")}>Sign in</button>}
           </div>
         </header>
 
