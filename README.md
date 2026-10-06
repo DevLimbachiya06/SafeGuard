@@ -1,6 +1,6 @@
 # SafeGuard UAE
 
-AI-assisted disaster and emergency management platform for smart-city coordination in the UAE.
+Smart disaster and emergency management platform for smart-city coordination in the UAE.
 
 ## Vision
 
@@ -29,7 +29,7 @@ flowchart LR
 
 ## Main Features
 
-- AI disaster prediction dashboard and dynamic risk scoring matrix.
+- Smart disaster prediction dashboard and dynamic risk scoring matrix.
 - Assisted-response synchronization for multi-agency field coordination.
 - Geofenced smart public alerts with evacuation route recommendations.
 - Responder Visibility Traffic System (RVTS) for lane-clearing warnings.
