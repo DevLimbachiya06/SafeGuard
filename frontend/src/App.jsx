@@ -399,6 +399,12 @@ export default function App() {
     zoneName: "Dubai South",
   });
 
+  useEffect(() => {
+    if (!message) return undefined;
+    const dismissTimer = setTimeout(() => setMessage(null), 4200);
+    return () => clearTimeout(dismissTimer);
+  }, [message]);
+
   const headers = useMemo(() => {
     const base = { "Content-Type": "application/json" };
     return token ? { ...base, Authorization: `Bearer ${token}` } : base;
@@ -834,7 +840,14 @@ export default function App() {
                   <div className="feed-item telemetry-item" key={item.sourceId}>
                     <div>
                       <div className="feed-title"><span className={`telemetry-signal signal-${item.riskBand}`} /> <strong>{item.locationName}</strong></div>
-                      <span>{item.type} · <TelemetryMetric label="AQI" value={item.airQualityIndex} tone={item.airQualityIndex >= 150 ? "critical" : ""} /> · <TelemetryMetric label="Flood" value={`${item.floodLevelM}m`} tone={item.floodLevelM >= 1.1 || item.floodLevelM >= 0.7 && item.riskBand === "critical" ? "critical" : ""} /> · <TelemetryMetric label="Temp" value={`${item.temperatureC}°C`} tone={item.temperatureC >= 43 ? "high" : ""} /></span>
+                      <div className="telemetry-details">
+                        <span className="telemetry-type">{item.type}</span>
+                        <div className="telemetry-metrics">
+                          <TelemetryMetric label="AQI" value={item.airQualityIndex} tone={item.airQualityIndex >= 150 ? "critical" : ""} />
+                          <TelemetryMetric label="Flood" value={`${item.floodLevelM}m`} tone={item.floodLevelM >= 1.1 || item.floodLevelM >= 0.7 && item.riskBand === "critical" ? "critical" : ""} />
+                          <TelemetryMetric label="Temp" value={`${item.temperatureC}°C`} tone={item.temperatureC >= 43 ? "high" : ""} />
+                        </div>
+                      </div>
                     </div>
                     <span className={`risk-badge risk-${item.riskBand}`}>{item.riskBand}</span>
                   </div>
