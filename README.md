@@ -49,7 +49,15 @@ Mobile biometric unlock is a demo flow. Face ID and fingerprint buttons unlock t
 Start the full stack with Docker Compose from the repository root:
 
 ```bash
-docker compose up --build
+docker compose up --build --force-recreate
+```
+
+If an older container or image is still serving the previous UI, rebuild the
+application services without using their build cache:
+
+```bash
+docker compose build --no-cache backend frontend mobile-preview
+docker compose up --force-recreate
 ```
 
 This brings up:
@@ -72,7 +80,10 @@ The backend reads these environment variables:
 - `JWT_SECRET`: token signing secret, defaults to a demo value.
 - `ALLOWED_ORIGINS`: comma-separated list of frontend origins.
 
-The web apps default to `http://localhost:8080/api` for API requests, and the compose file injects the same API URL for Docker runs.
+The web apps use `http://localhost:8080/api` for browser-to-host API requests
+when running in Docker. The compose file allows both `localhost` and
+`127.0.0.1` origins. The backend, database, and Redis services have health
+checks so the UI containers wait for the API and its dependencies to be ready.
 
 ## API Summary
 

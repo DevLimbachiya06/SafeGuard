@@ -222,25 +222,84 @@ function MapVisualization({ incidents, responders, hospitals, riskZones }) {
   );
 }
 
-function LoginModal({ onPasswordLogin, onNfcLogin, onBiometricLogin, busy, initialValue }) {
+const roleLabels = {
+  commander: "Command Center / Admin",
+  responder: "First Responder / Field Operator",
+  officer: "Public Safety Officer",
+  citizen: "Public Safety Officer",
+};
+
+function LoginModal({ onPasswordLogin, onLoginComplete, onNfcLogin, onBiometricLogin, busy, initialValue }) {
   const [form, setForm] = useState(initialValue);
-  const [rolePreset, setRolePreset] = useState("commander");
+  const [showPassword, setShowPassword] = useState(false);
+  const [rememberDevice, setRememberDevice] = useState(true);
+  const [step, setStep] = useState("credentials");
+  const [otp, setOtp] = useState("");
+  const [pendingLogin, setPendingLogin] = useState(null);
+  const [error, setError] = useState("");
+
+  const submitCredentials = async (event) => {
+    event.preventDefault();
+    setError("");
+    if (!form.emiratesId.trim() || form.password.length < 8) {
+      setError("Enter a valid Government ID and password.");
+      return;
+    }
+    try {
+      const payload = await onPasswordLogin(form);
+      setPendingLogin(payload);
+      setStep("mfa");
+    } catch {
+      setError("Invalid agency credentials. Verify your ID and password.");
+    }
+  };
+
+  const verifyOtp = (event) => {
+    event.preventDefault();
+    if (otp !== "246810") {
+      setError("The verification code is incorrect. Try 246810 for this demo.");
+      return;
+    }
+    onLoginComplete(pendingLogin, rememberDevice ? "Secure device verified" : "Signed in", rememberDevice);
+  };
 
   return (
-    <div className="login-overlay">
-      <div className="modal">
-        <div className="modal-head">
+    <div className="login-screen">
+      <div className="login-visual">
+        <div className="login-grid" />
+        <div className="login-visual-content">
+          <div className="eyebrow"><span className="signal-dot" /> Secure operations network</div>
+          <h1>Coordinating a safer, more resilient UAE.</h1>
+          <p>One trusted operational picture for command teams, responders, and public safety leaders.</p>
+          <div className="login-visual-footer">
+            <span>24/7 monitored platform</span>
+            <span>Encrypted agency access</span>
+          </div>
         </div>
+      </div>
+      <div className="login-panel">
+        <div className="login-agency">
+          <img className="brand-logo" src="/logo.png" alt="SafeGuard" />
+          <div>
+            <strong>SafeGuard</strong>
+            <span>Emergency &amp; Disaster Management Portal</span>
+          </div>
+        </div>
+        <div className="official-badge"><span>✓</span> Official Government Portal <b>·</b> Unauthorized Access Prohibited</div>
+        {step === "credentials" ? (
         <form
           className="login-form"
-          onSubmit={(event) => {
-            event.preventDefault();
-            onPasswordLogin(form);
-          }}
+          onSubmit={submitCredentials}
         >
+          <div className="login-heading">
+            <span className="step-kicker">Secure sign-in · Step 1 of 2</span>
+            <h2>Access the command environment</h2>
+            <p>Use your registered agency credentials to continue.</p>
+          </div>
           <label className="field">
-            <span>Emirates ID</span>
+            <span>Government ID or agency email</span>
             <input
+              autoComplete="username"
               value={form.emiratesId}
               onChange={(event) => setForm((current) => ({ ...current, emiratesId: event.target.value }))}
               placeholder="784-1989-1111111-1"
@@ -249,41 +308,53 @@ function LoginModal({ onPasswordLogin, onNfcLogin, onBiometricLogin, busy, initi
           <label className="field">
             <span>Password</span>
             <input
-              type="password"
+              type={showPassword ? "text" : "password"}
+              autoComplete="current-password"
               value={form.password}
               onChange={(event) => setForm((current) => ({ ...current, password: event.target.value }))}
-              placeholder="demo password"
+              placeholder="Enter your secure password"
             />
-          </label>
-          <label className="field">
-            <span>Role preset</span>
-            <select value={rolePreset} onChange={(event) => setRolePreset(event.target.value)}>
-              <option value="commander">Commander</option>
-              <option value="responder">Responder</option>
-            </select>
-          </label>
-          <div className="modal-actions" style={{ gridColumn: "1 / -1" }}>
-            <button className="cta primary" type="submit" disabled={busy}>
-              {busy ? "Signing in..." : "Sign in with password"}
+            <button type="button" className="password-toggle" onClick={() => setShowPassword((visible) => !visible)}>
+              {showPassword ? "Hide" : "Show"}
             </button>
-            <button
-              type="button"
-              className="cta"
-              onClick={onNfcLogin}
-              disabled={busy}
-            >
-              NFC Employee ID login-Demo
-            </button>
-            <button
-              type="button"
-              className="cta secondary"
-              onClick={onBiometricLogin}
-              disabled={busy}
-            >
-              Biometric login-Demo
+          </label>
+          <div className="login-options">
+            <label className="check-option"><input type="checkbox" checked={rememberDevice} onChange={(event) => setRememberDevice(event.target.checked)} /> <span>Remember this device</span></label>
+            <a href="#clearance" onClick={(event) => { event.preventDefault(); setError("Contact your agency administrator to request clearance."); }}>Forgot credentials?</a>
+          </div>
+          {error ? <div className="form-error" role="alert">{error}</div> : null}
+          <div className="modal-actions">
+            <button className="cta primary login-submit" type="submit" disabled={busy}>
+              {busy ? <><span className="spinner" /> Verifying credentials</> : <>Continue securely <span>→</span></>}
             </button>
           </div>
+          <div className="login-divider"><span>or use a registered device</span></div>
+          <div className="login-alt-actions">
+            <button type="button" className="cta secondary" onClick={onNfcLogin} disabled={busy}>NFC agency ID</button>
+            <button type="button" className="cta secondary" onClick={onBiometricLogin} disabled={busy}>Biometric sign-in</button>
+          </div>
         </form>
+        ) : (
+          <form className="login-form mfa-form" onSubmit={verifyOtp}>
+            <div className="login-heading">
+              <span className="step-kicker">Secure sign-in · Step 2 of 2</span>
+              <h2>Verify your identity</h2>
+              <p>Enter the six-digit code sent to your registered agency device.</p>
+            </div>
+            <div className="mfa-icon">⌁</div>
+            <label className="field">
+              <span>One-time verification code</span>
+              <input autoFocus inputMode="numeric" maxLength={6} value={otp} onChange={(event) => { setOtp(event.target.value.replace(/\D/g, "")); setError(""); }} placeholder="000000" />
+            </label>
+            {error ? <div className="form-error" role="alert">{error}</div> : null}
+            <div className="modal-actions">
+              <button className="cta primary login-submit" type="submit" disabled={busy || otp.length !== 6}>Verify and enter <span>→</span></button>
+              <button type="button" className="text-button" onClick={() => { setStep("credentials"); setOtp(""); setError(""); }}>← Use different credentials</button>
+            </div>
+            <p className="demo-hint">Demo verification code: <strong>246810</strong></p>
+          </form>
+        )}
+        <div className="login-footer"><span>Session protected by agency-grade encryption</span><span>v2.4.1</span></div>
       </div>
     </div>
   );
@@ -294,12 +365,13 @@ export default function App() {
   const [dashboard, setDashboard] = useState(defaultDashboard);
   const [predictions, setPredictions] = useState([]);
   const [health, setHealth] = useState(null);
-  const [token, setToken] = useState(() => localStorage.getItem("safeguard-token") || "");
+  const [token, setToken] = useState(() => localStorage.getItem("safeguard-token") || sessionStorage.getItem("safeguard-token") || "");
   const [user, setUser] = useState(() => {
-    const saved = localStorage.getItem("safeguard-user");
+    const saved = localStorage.getItem("safeguard-user") || sessionStorage.getItem("safeguard-user");
     return saved ? JSON.parse(saved) : null;
   });
   const [busy, setBusy] = useState(false);
+  const [currentTime, setCurrentTime] = useState(new Date());
   const [message, setMessage] = useState(null);
   const [incidentForm, setIncidentForm] = useState({
     title: "Flood risk spike near E611 corridor",
@@ -346,6 +418,11 @@ export default function App() {
   }, []);
 
   useEffect(() => {
+    const clock = setInterval(() => setCurrentTime(new Date()), 1000);
+    return () => clearInterval(clock);
+  }, []);
+
+  useEffect(() => {
     void refresh();
     const timer = setInterval(refresh, 5000);
     return () => clearInterval(timer);
@@ -384,6 +461,8 @@ export default function App() {
       } catch {
         localStorage.removeItem("safeguard-token");
         localStorage.removeItem("safeguard-user");
+        sessionStorage.removeItem("safeguard-token");
+        sessionStorage.removeItem("safeguard-user");
         setToken("");
         setUser(null);
         setStage("login");
@@ -393,9 +472,14 @@ export default function App() {
     void me();
   }, [headers, stage, token]);
 
-  const completeLogin = async (payload, title = "Signed in") => {
-    localStorage.setItem("safeguard-token", payload.token);
-    localStorage.setItem("safeguard-user", JSON.stringify(payload.user));
+  const completeLogin = async (payload, title = "Signed in", rememberDevice = true) => {
+    const storage = rememberDevice ? localStorage : sessionStorage;
+    localStorage.removeItem("safeguard-token");
+    localStorage.removeItem("safeguard-user");
+    sessionStorage.removeItem("safeguard-token");
+    sessionStorage.removeItem("safeguard-user");
+    storage.setItem("safeguard-token", payload.token);
+    storage.setItem("safeguard-user", JSON.stringify(payload.user));
     setToken(payload.token);
     setUser(payload.user);
     setStage("app");
@@ -411,9 +495,9 @@ export default function App() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
       });
-      await completeLogin(payload, "Signed in");
+      return payload;
     } catch (error) {
-      setMessage({ tone: "error", title: "Login failed", text: "Check your Emirates ID and password." });
+      throw error;
     } finally {
       setBusy(false);
     }
@@ -468,6 +552,8 @@ export default function App() {
   const signOut = () => {
     localStorage.removeItem("safeguard-token");
     localStorage.removeItem("safeguard-user");
+    sessionStorage.removeItem("safeguard-token");
+    sessionStorage.removeItem("safeguard-user");
     setToken("");
     setUser(null);
     setStage("login");
@@ -566,6 +652,7 @@ export default function App() {
       <div className="app-shell">
         <LoginModal
           onPasswordLogin={passwordLogin}
+          onLoginComplete={completeLogin}
           onNfcLogin={nfcEmployeeLogin}
           onBiometricLogin={biometricLogin}
           busy={busy}
@@ -596,10 +683,12 @@ export default function App() {
           </div>
 
           <div className="dock-row">
+            <span className="status-chip clock-chip"><span className="signal-dot" /> {currentTime.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" })} GST</span>
+            <span className="status-chip risk-status">Threat level: <b>{summary.averageRisk > 80 ? "HIGH" : summary.averageRisk > 60 ? "ADVISORY" : "NORMAL"}</b></span>
             <span className="status-chip">Active: {summary.activeIncidents}</span>
             <span className="status-chip">RVTS: {summary.rvtsWarnings}</span>
             <span className="status-chip mobile-hide">Coverage: {summary.coveragePct}%</span>
-            {user ? <span className="status-chip">{user.name}</span> : null}
+            {user ? <span className="status-chip user-chip"><span className="avatar">{user.name?.slice(0, 1)}</span><span>{user.name}</span><small>{roleLabels[user.role] || user.role}</small></span> : null}
             <button className="cta secondary" onClick={() => setStage("login")}>{token ? "Switch account" : "Sign in"}</button>
             {token ? <button className="cta" onClick={signOut}>Sign out</button> : null}
           </div>
