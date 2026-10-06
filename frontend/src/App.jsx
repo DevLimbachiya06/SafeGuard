@@ -81,6 +81,15 @@ function Metric({ label, value, note }) {
   );
 }
 
+const riskTone = (score) => score >= 85 ? "critical" : score >= 75 ? "high" : score >= 60 ? "moderate" : "low";
+const trendTone = (trend) => trend === "rising" ? "critical" : trend === "steady" ? "normal" : "low";
+const telemetryIcon = (zoneName) => zoneName.includes("Dubai") ? "≋" : zoneName.includes("Al Ain") ? "✦" : "☼";
+const readinessTone = (occupancy) => occupancy >= 85 ? "critical" : occupancy >= 75 ? "high" : "low";
+
+function TelemetryMetric({ label, value, tone }) {
+  return <span className={`telemetry-metric ${tone || ""}`}>{label} <strong>{value}</strong></span>;
+}
+
 function MapVisualization({ incidents, responders, hospitals, riskZones }) {
   const mapBoundsLeaflet = useMemo(
     () => [
@@ -803,14 +812,14 @@ export default function App() {
 
             <div className="risk-grid" style={{ marginTop: 16 }}>
               {predictions.map((zone) => (
-                <div key={zone.zoneId} className="risk-card">
-                  <div className="status-row">
-                    <strong>{zone.zoneName}</strong>
-                    <span className="badge">{zone.trend}</span>
+                <div key={zone.zoneId} className={`risk-card risk-card-${riskTone(zone.riskScore)}`}>
+                  <div className="risk-card-head">
+                    <div className="risk-name"><span className="telemetry-icon" aria-hidden="true">{telemetryIcon(zone.zoneName)}</span><strong>{zone.zoneName}</strong></div>
+                    <span className={`risk-badge risk-${trendTone(zone.trend)}`}>{zone.trend}</span>
                   </div>
                   <div className="mini">{zone.prediction}</div>
-                  <div className="risk-bar"><span style={{ width: `${zone.riskScore}%` }} /></div>
-                  <div className="status-row" style={{ marginTop: 12 }}>
+                  <div className="risk-progress"><span className={`risk-fill risk-fill-${riskTone(zone.riskScore)}`} style={{ width: `${zone.riskScore}%` }} /></div>
+                  <div className="risk-card-meta">
                     <span className="mini">Risk {zone.riskScore}%</span>
                     <span className="mini">Confidence {Math.round(zone.confidence * 100)}%</span>
                   </div>
@@ -818,16 +827,16 @@ export default function App() {
               ))}
             </div>
 
-            <div className="alert-card" style={{ marginTop: 16 }}>
-              <h4>Telemetry feed</h4>
+            <div className="alert-card telemetry-card" style={{ marginTop: 16 }}>
+              <div className="panel-head compact-head"><h4>Telemetry feed</h4><span className="mini">Live streams</span></div>
               <div className="list" style={{ marginTop: 12 }}>
                 {dashboard.telemetry.map((item) => (
-                  <div className="feed-item" key={item.sourceId}>
+                  <div className="feed-item telemetry-item" key={item.sourceId}>
                     <div>
-                      <strong>{item.locationName}</strong>
-                      <span>{item.type} · AQI {item.airQualityIndex} · Flood {item.floodLevelM}m · {item.temperatureC}°C</span>
+                      <div className="feed-title"><span className={`telemetry-signal signal-${item.riskBand}`} /> <strong>{item.locationName}</strong></div>
+                      <span>{item.type} · <TelemetryMetric label="AQI" value={item.airQualityIndex} tone={item.airQualityIndex >= 150 ? "critical" : ""} /> · <TelemetryMetric label="Flood" value={`${item.floodLevelM}m`} tone={item.floodLevelM >= 1.1 || item.floodLevelM >= 0.7 && item.riskBand === "critical" ? "critical" : ""} /> · <TelemetryMetric label="Temp" value={`${item.temperatureC}°C`} tone={item.temperatureC >= 43 ? "high" : ""} /></span>
                     </div>
-                    <Badge tone={item.riskBand}>{item.riskBand}</Badge>
+                    <span className={`risk-badge risk-${item.riskBand}`}>{item.riskBand}</span>
                   </div>
                 ))}
               </div>
@@ -843,12 +852,12 @@ export default function App() {
             </div>
             <div className="list" style={{ marginTop: 14 }}>
               {dashboard.hospitals.map((hospital) => (
-                <div className="feed-item" key={hospital.id}>
+                <div className="feed-item hospital-item" key={hospital.id}>
                   <div>
-                    <strong>{hospital.name}</strong>
+                    <div className="feed-title"><span className={`readiness-dot readiness-${readinessTone(hospital.occupancyPct)}`} /><strong>{hospital.name}</strong></div>
                     <span>{hospital.emirate} · {hospital.availableBeds} beds free · ICU {hospital.icuAvailable}</span>
                   </div>
-                  <div className="mini">Occupancy {hospital.occupancyPct}%</div>
+                  <div className="hospital-occupancy"><span className={`readiness-dot readiness-${readinessTone(hospital.occupancyPct)}`} />Occupancy {hospital.occupancyPct}%</div>
                 </div>
               ))}
             </div>

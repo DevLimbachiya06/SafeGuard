@@ -24,7 +24,7 @@ html {
 body {
   margin: 0;
   color: var(--text);
-  font-family: "Space Grotesk", system-ui, sans-serif;
+  font-family: "Inter", system-ui, sans-serif;
   background:
     radial-gradient(circle at 10% 10%, rgba(51, 211, 192, 0.14), transparent 28%),
     radial-gradient(circle at 88% 18%, rgba(255, 93, 79, 0.16), transparent 30%),
@@ -630,29 +630,198 @@ a {
 .risk-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 14px;
+  gap: 16px;
 }
 
 .risk-card {
-  padding: 14px;
-  border-radius: 18px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(255, 255, 255, 0.04);
+  min-height: 180px;
+  padding: 16px;
+  border: 1px solid #26364b;
+  border-radius: 12px;
+  background: #101d2d;
+  box-shadow: inset 3px 0 0 transparent;
 }
 
-.risk-bar {
-  height: 10px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.08);
+.risk-card-critical { box-shadow: inset 3px 0 0 #e05b5b; }
+.risk-card-high { box-shadow: inset 3px 0 0 #e69b45; }
+.risk-card-moderate { box-shadow: inset 3px 0 0 #d8b34c; }
+.risk-card-low { box-shadow: inset 3px 0 0 #65c8b3; }
+
+.risk-card-head,
+.risk-card-meta,
+.feed-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.risk-name {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-width: 0;
+}
+
+.risk-name strong {
   overflow: hidden;
-  margin-top: 12px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.risk-bar span {
+.telemetry-icon {
+  display: inline-grid;
+  width: 26px;
+  height: 26px;
+  place-items: center;
+  border: 1px solid #31445b;
+  border-radius: 8px;
+  color: #92a9bf;
+  background: #16263a;
+  font-size: 1rem;
+}
+
+.risk-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 64px;
+  padding: 5px 8px;
+  border: 1px solid;
+  border-radius: 6px;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.risk-critical {
+  color: #ffb0aa;
+  border-color: #8f3f45;
+  background: #5c2932;
+}
+
+.risk-high {
+  color: #ffd29c;
+  border-color: #8b5b2e;
+  background: #59391e;
+}
+
+.risk-moderate {
+  color: #f6dda0;
+  border-color: #8b7229;
+  background: #55491d;
+}
+
+.risk-low,
+.risk-normal {
+  color: #a7e9dc;
+  border-color: #32766f;
+  background: #1d514e;
+}
+
+.risk-progress {
+  height: 6px;
+  border-radius: 999px;
+  margin-top: 18px;
+  overflow: hidden;
+  background: #1b2b3e;
+}
+
+.risk-fill {
   display: block;
   height: 100%;
   border-radius: inherit;
-  background: linear-gradient(90deg, var(--accent-2), var(--accent-3), var(--accent));
+  transition: width 300ms ease;
+}
+
+.risk-fill-critical { background: #e05b5b; }
+.risk-fill-high { background: #e69b45; }
+.risk-fill-moderate { background: #d8b34c; }
+.risk-fill-low { background: #65c8b3; }
+
+.risk-card .mini {
+  margin-top: 12px;
+  min-height: 38px;
+  line-height: 1.5;
+}
+
+.risk-card-meta {
+  margin-top: 10px;
+}
+
+.telemetry-card,
+.hospital-item {
+  border: 1px solid #26364b;
+  border-radius: 12px;
+  background: #101d2d;
+}
+
+.compact-head {
+  align-items: baseline;
+}
+
+.telemetry-item,
+.hospital-item {
+  padding: 12px;
+  border: 1px solid #26364b;
+  border-radius: 10px;
+  background: #132236;
+}
+
+.telemetry-item > div:first-child,
+.hospital-item > div:first-child {
+  min-width: 0;
+}
+
+.telemetry-item > div:first-child > span,
+.hospital-item > div:first-child > span {
+  display: block;
+  margin-top: 7px;
+  line-height: 1.5;
+}
+
+.telemetry-signal,
+.readiness-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+}
+
+.signal-critical,
+.readiness-critical { background: #e05b5b; box-shadow: 0 0 0 3px rgba(224, 91, 91, 0.12); }
+.signal-high,
+.readiness-high { background: #e69b45; box-shadow: 0 0 0 3px rgba(230, 155, 69, 0.12); }
+.signal-moderate { background: #d8b34c; box-shadow: 0 0 0 3px rgba(216, 179, 76, 0.12); }
+.signal-low,
+.readiness-low { background: #65c8b3; box-shadow: 0 0 0 3px rgba(101, 200, 179, 0.12); }
+
+.telemetry-metric strong {
+  color: inherit;
+  font-size: inherit;
+}
+
+.telemetry-metric.critical {
+  color: #ff918b;
+  font-weight: 700;
+}
+
+.telemetry-metric.high {
+  color: #ffc078;
+  font-weight: 700;
+}
+
+.hospital-occupancy {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: #aab8ca;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.68rem;
+  white-space: nowrap;
 }
 
 .field {
@@ -1831,6 +2000,47 @@ a {
     padding: 26px 18px;
   }
 
+  /* Final semantic risk tokens take precedence over generic profile badges. */
+  .risk-card .risk-badge.risk-critical,
+  .telemetry-item .risk-badge.risk-critical {
+    color: #fff3f1;
+    border-color: #b2474c;
+    background: #9f3e45;
+  }
+
+  .risk-card .risk-badge.risk-high,
+  .telemetry-item .risk-badge.risk-high {
+    color: #fff5e5;
+    border-color: #b87332;
+    background: #9b5a25;
+  }
+
+  .risk-card .risk-badge.risk-moderate,
+  .telemetry-item .risk-badge.risk-moderate {
+    color: #fff8df;
+    border-color: #b08c2e;
+    background: #8e7420;
+  }
+
+  .risk-card .risk-badge.risk-low,
+  .risk-card .risk-badge.risk-normal,
+  .telemetry-item .risk-badge.risk-low,
+  .telemetry-item .risk-badge.risk-normal {
+    color: #eafff8;
+    border-color: #3d8e82;
+    background: #22665e;
+  }
+
+  .section-grid > .panel > .panel-head {
+    min-height: 56px;
+    align-items: flex-start;
+  }
+
+  .section-grid > .panel > .panel-head h3 {
+    font-size: 1.1rem;
+    letter-spacing: -0.015em;
+  }
+
   .login-alt-actions {
     grid-template-columns: 1fr;
   }
@@ -1839,4 +2049,35 @@ a {
     flex-direction: column;
     gap: 7px;
   }
+}
+
+/* Semantic risk badges remain consistent at every viewport size. */
+.risk-card .risk-badge.risk-critical,
+.telemetry-item .risk-badge.risk-critical {
+  color: #fff3f1;
+  border-color: #b2474c;
+  background: #9f3e45;
+}
+
+.risk-card .risk-badge.risk-high,
+.telemetry-item .risk-badge.risk-high {
+  color: #fff5e5;
+  border-color: #b87332;
+  background: #9b5a25;
+}
+
+.risk-card .risk-badge.risk-moderate,
+.telemetry-item .risk-badge.risk-moderate {
+  color: #fff8df;
+  border-color: #b08c2e;
+  background: #8e7420;
+}
+
+.risk-card .risk-badge.risk-low,
+.risk-card .risk-badge.risk-normal,
+.telemetry-item .risk-badge.risk-low,
+.telemetry-item .risk-badge.risk-normal {
+  color: #eafff8;
+  border-color: #3d8e82;
+  background: #22665e;
 }
