@@ -342,6 +342,7 @@ export default function App() {
   const holdTriggeredRef = useRef(false);
   const mapSectionRef = useRef(null);
   const reportSectionRef = useRef(null);
+  const profileRootRef = useRef(null);
 
   useEffect(() => {
     if (!toast) return undefined;
@@ -353,6 +354,27 @@ export default function App() {
     if (!user) return;
     setProfileForm({ name: user.name || "", contact: user.contact || "", role: user.roleLabel || roleLabels[user.role] || user.role || "" });
   }, [user]);
+
+  useEffect(() => {
+    if (!profileOpen) return undefined;
+
+    const closeOnOutsidePointer = (event) => {
+      if (!profileRootRef.current?.contains(event.target)) setProfileOpen(false);
+    };
+    const closeOnEscape = (event) => {
+      if (event.key === "Escape") setProfileOpen(false);
+    };
+    const closeOnScroll = () => setProfileOpen(false);
+
+    document.addEventListener("pointerdown", closeOnOutsidePointer);
+    document.addEventListener("keydown", closeOnEscape);
+    window.addEventListener("scroll", closeOnScroll, true);
+    return () => {
+      document.removeEventListener("pointerdown", closeOnOutsidePointer);
+      document.removeEventListener("keydown", closeOnEscape);
+      window.removeEventListener("scroll", closeOnScroll, true);
+    };
+  }, [profileOpen]);
   useEffect(() => {
     if (stage !== "app") return undefined;
 
@@ -787,7 +809,7 @@ export default function App() {
                 <div className="eyebrow">Citizen safety mode</div>
                 <div className="hero-name">{user ? user.name : "Demo citizen"}</div>
               </div>
-              <div className="hero-actions">
+              <div className="hero-actions" ref={profileRootRef}>
                 <button className="icon-btn" type="button" onClick={() => scrollToSection(mapSectionRef)}>🗺️</button>
                 <button className="icon-btn" type="button" onClick={() => scrollToSection(reportSectionRef)}>📣</button>
                 <button className={`profile-trigger ${profileOpen ? "is-open" : ""}`} type="button" onClick={() => setProfileOpen((open) => !open)} aria-expanded={profileOpen}>
