@@ -35,6 +35,12 @@ const defaultLogin = {
 
 const reportTypes = ["Anomaly", "Road hazard", "Utility issue", "Suspicious activity", "Medical concern", "Fire risk"];
 const reportSeverities = ["low", "moderate", "high", "critical"];
+const roleLabels = {
+  commander: "Command Center Operator",
+  responder: "Field Operations Officer",
+  officer: "Public Safety Officer",
+  citizen: "Public Safety Officer",
+};
 const mapBounds = {
   minLat: 22.6,
   maxLat: 26.5,
@@ -67,6 +73,10 @@ const readinessTone = (occupancy) => occupancy >= 85 ? "critical" : occupancy >=
 
 function TelemetryMetric({ label, value, tone = "" }) {
   return <span className={`telemetry-metric ${tone}`}><small>{label}</small><strong>{value}</strong></span>;
+}
+
+function initials(name = "User") {
+  return name.split(" ").map((part) => part[0]).join("").slice(0, 2).toUpperCase();
 }
 
 function getStoredJson(key) {
@@ -314,6 +324,11 @@ export default function App() {
   const [sosProgress, setSosProgress] = useState(0);
   const [reportBusy, setReportBusy] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [profilePanel, setProfilePanel] = useState(null);
+  const [accountSwitcherOpen, setAccountSwitcherOpen] = useState(false);
+  const [profileForm, setProfileForm] = useState({ name: "", contact: "", role: "" });
+  const [notifications, setNotifications] = useState(() => getStoredJson("safeguard-notifications") || { criticalAlerts: true, telemetryWarnings: true, systemLogs: false });
+  const [preferences, setPreferences] = useState(() => getStoredJson("safeguard-preferences") || { density: "comfortable", theme: "dark", timezone: "GST" });
   const [reportForm, setReportForm] = useState({
     title: "Smoke detected in a parking area",
     type: "Anomaly",
@@ -333,6 +348,11 @@ export default function App() {
     const dismissTimer = setTimeout(() => setToast(null), 4200);
     return () => clearTimeout(dismissTimer);
   }, [toast]);
+
+  useEffect(() => {
+    if (!user) return;
+    setProfileForm({ name: user.name || "", contact: user.contact || "", role: user.roleLabel || roleLabels[user.role] || user.role || "" });
+  }, [user]);
   useEffect(() => {
     if (stage !== "app") return undefined;
 
@@ -452,6 +472,28 @@ export default function App() {
     setToken("");
     setUser(null);
     setStage("splash");
+  };
+
+  const updateProfile = (event) => {
+    event.preventDefault();
+    const nextUser = { ...user, name: profileForm.name.trim() || user.name, contact: profileForm.contact.trim(), roleLabel: profileForm.role.trim() || roleLabels[user.role] || user.role };
+    setUser(nextUser);
+    localStorage.setItem("safeguard-user", JSON.stringify(nextUser));
+    setProfilePanel(null);
+    setToast({ tone: "success", title: "Profile updated", text: "Your profile was saved on this device." });
+  };
+
+  const toggleNotification = (key) => {
+    const next = { ...notifications, [key]: !notifications[key] };
+    setNotifications(next);
+    localStorage.setItem("safeguard-notifications", JSON.stringify(next));
+    setToast({ tone: "success", title: "Settings updated", text: "Your alert routing preference is active." });
+  };
+
+  const savePreferences = (next) => {
+    setPreferences(next);
+    localStorage.setItem("safeguard-preferences", JSON.stringify(next));
+    setToast({ tone: "success", title: "Preferences updated", text: "Your mobile command view has been updated." });
   };
 
   const biometricUnlock = (method) => {
@@ -755,10 +797,17 @@ export default function App() {
             </div>
             {profileOpen ? (
               <div className="mobile-profile-menu">
-                <strong>{user?.name || "Guest operator"}</strong>
-                <span>{user?.agency || "SafeGuard Emergency Operations"}</span>
-                <span>{user?.role || "Citizen safety profile"} · Active session</span>
-                <button type="button" onClick={() => { setProfileOpen(false); logout(); }}>Sign out</button>
+                <div className="mobile-profile-head"><span className="profile-avatar large">{initials(user?.name)}</span><div><strong>{user?.name || "Guest operator"}</strong><span>{user?.email || user?.emiratesId || "Registered agency account"}</span><small>{user?.agency || "SafeGuard Emergency Operations"}</small></div></div>
+                <div className="mobile-clearance"><span>Active clearance</span><b>LEVEL 3 · OPERATIONAL</b></div>
+                <div className="mobile-profile-actions">
+                  <button type="button" onClick={() => { setProfileOpen(false); setProfilePanel("profile"); }}>Edit profile <span>→</span></button>
+                  <button type="button" onClick={() => { setProfileOpen(false); setProfilePanel("notifications"); }}>Notification settings <span>→</span></button>
+                  <button type="button" onClick={() => { setProfileOpen(false); setProfilePanel("preferences"); }}>System preferences <span>→</span></button>
+                </div>
+                <div className="mobile-profile-session">
+                  <button type="button" onClick={() => { setProfileOpen(false); setAccountSwitcherOpen(true); }}>Switch account <span>⇄</span></button>
+                  <button className="signout-action" type="button" onClick={() => { setProfileOpen(false); logout(); }}>Sign out <span>↗</span></button>
+                </div>
               </div>
             ) : null}
           </div>
@@ -902,21 +951,34 @@ export default function App() {
             {reportCard}
           </div>
 
-          <div className="section panel profile-panel">
-            <div className="section-head">
-              <div>
-                <div className="eyebrow">Account</div>
-                <strong>{user ? user.name : "Guest"}</strong>
-              </div>
-              <Badge tone={token ? "success" : "warning"}>{token ? "Signed in" : "Signed out"}</Badge>
-            </div>
-            <div className="profile-meta">
-              <span>{user?.role || "Citizen"}</span>
-              <span>{user?.emiratesId || loginForm.emiratesId}</span>
-            </div>
-            <button className="danger-btn" type="button" onClick={logout}>Logout</button>
-          </div>
         </div>
+
+        {profilePanel ? (
+          <div className="mobile-settings-overlay" role="presentation" onMouseDown={(event) => event.target === event.currentTarget && setProfilePanel(null)}>
+            <aside className="mobile-settings-drawer" role="dialog" aria-modal="true">
+              <div className="drawer-head"><div><span className="eyebrow">Operator console</span><h2>{profilePanel === "profile" ? "Edit profile" : profilePanel === "notifications" ? "Notification settings" : "System preferences"}</h2></div><button className="drawer-close" type="button" onClick={() => setProfilePanel(null)} aria-label="Close settings">×</button></div>
+              {profilePanel === "profile" ? (
+                <form className="profile-form" onSubmit={updateProfile}>
+                  <div className="drawer-identity"><span className="profile-avatar large">{initials(profileForm.name)}</span><div><strong>{user?.agency || "SafeGuard Emergency Operations"}</strong><span>Active clearance · Level 3</span></div></div>
+                  <label className="field"><span>Full name</span><input value={profileForm.name} onChange={(event) => setProfileForm({ ...profileForm, name: event.target.value })} required /></label>
+                  <label className="field"><span>Contact number</span><input value={profileForm.contact} onChange={(event) => setProfileForm({ ...profileForm, contact: event.target.value })} placeholder="+971 50 000 0000" /></label>
+                  <label className="field"><span>Emergency role</span><input value={profileForm.role} onChange={(event) => setProfileForm({ ...profileForm, role: event.target.value })} /></label>
+                  <div className="drawer-actions"><button className="secondary-btn" type="button" onClick={() => setProfilePanel(null)}>Cancel</button><button className="primary-btn" type="submit">Save changes</button></div>
+                </form>
+              ) : profilePanel === "notifications" ? (
+                <div className="settings-list"><p className="drawer-copy">Choose which operational updates are routed to this profile.</p>{[["criticalAlerts", "Critical emergency alerts", "Incident and evacuation notifications"], ["telemetryWarnings", "Telemetry warnings", "Sensor thresholds and infrastructure anomalies"], ["systemLogs", "System activity logs", "Authentication and service events"]].map(([key, label, description]) => <button className="setting-row" type="button" key={key} onClick={() => toggleNotification(key)}><span><strong>{label}</strong><small>{description}</small></span><span className={`toggle ${notifications[key] ? "is-on" : ""}`}><span /></span></button>)}</div>
+              ) : (
+                <div className="settings-list"><p className="drawer-copy">Tune the mobile command view for your operating conditions.</p><div className="preference-group"><span className="setting-label">Interface density</span><div className="segmented-control">{["comfortable", "compact"].map((value) => <button className={preferences.density === value ? "active" : ""} type="button" key={value} onClick={() => savePreferences({ ...preferences, density: value })}>{value}</button>)}</div></div><div className="preference-group"><span className="setting-label">Theme</span><div className="segmented-control">{["dark", "light"].map((value) => <button className={preferences.theme === value ? "active" : ""} type="button" key={value} onClick={() => savePreferences({ ...preferences, theme: value })}>{value}</button>)}</div></div><label className="field"><span>Operational timezone</span><select value={preferences.timezone} onChange={(event) => savePreferences({ ...preferences, timezone: event.target.value })}><option value="GST">GST · UTC+4</option><option value="UTC">UTC</option><option value="AST">AST · UTC+3</option></select></label></div>
+              )}
+            </aside>
+          </div>
+        ) : null}
+
+        {accountSwitcherOpen ? (
+          <div className="mobile-settings-overlay" role="presentation" onMouseDown={(event) => event.target === event.currentTarget && setAccountSwitcherOpen(false)}>
+            <div className="mobile-account-modal" role="dialog" aria-modal="true"><div className="drawer-head"><div><span className="eyebrow">Session management</span><h2>Switch account</h2></div><button className="drawer-close" type="button" onClick={() => setAccountSwitcherOpen(false)} aria-label="Close account switcher">×</button></div><p className="drawer-copy">Select a stored profile or sign in with another authorized account.</p><button className="account-option selected" type="button"><span className="profile-avatar">{initials(user?.name)}</span><span><strong>{user?.name}</strong><small>{user?.agency || "SafeGuard agency"} · {user?.roleLabel || roleLabels[user?.role] || "Public Safety Officer"}</small></span><span className="account-active">Active</span></button><button className="add-account" type="button" onClick={() => { setAccountSwitcherOpen(false); logout(); }}>＋ Sign in to another account</button></div>
+          </div>
+        ) : null}
 
         {toast ? (
           <div className={`toast toast-fixed toast-tone-${toast.tone || "neutral"}`}>
