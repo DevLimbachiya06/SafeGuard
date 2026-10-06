@@ -61,6 +61,14 @@ function Badge({ children, tone = "neutral" }) {
   return <span className={`badge badge-${tone}`}>{children}</span>;
 }
 
+const riskTone = (score) => score >= 85 ? "critical" : score >= 75 ? "high" : score >= 60 ? "moderate" : "low";
+const trendTone = (trend) => trend === "rising" ? "critical" : trend === "steady" ? "normal" : "low";
+const readinessTone = (occupancy) => occupancy >= 85 ? "critical" : occupancy >= 75 ? "high" : "low";
+
+function TelemetryMetric({ label, value, tone = "" }) {
+  return <span className={`telemetry-metric ${tone}`}><small>{label}</small><strong>{value}</strong></span>;
+}
+
 function getStoredJson(key) {
   try {
     const value = localStorage.getItem(key);
@@ -305,6 +313,7 @@ export default function App() {
   const [sosHolding, setSosHolding] = useState(false);
   const [sosProgress, setSosProgress] = useState(0);
   const [reportBusy, setReportBusy] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
   const [reportForm, setReportForm] = useState({
     title: "Smoke detected in a parking area",
     type: "Anomaly",
@@ -318,6 +327,12 @@ export default function App() {
   const holdTriggeredRef = useRef(false);
   const mapSectionRef = useRef(null);
   const reportSectionRef = useRef(null);
+
+  useEffect(() => {
+    if (!toast) return undefined;
+    const dismissTimer = setTimeout(() => setToast(null), 4200);
+    return () => clearTimeout(dismissTimer);
+  }, [toast]);
   useEffect(() => {
     if (stage !== "app") return undefined;
 
@@ -733,8 +748,19 @@ export default function App() {
               <div className="hero-actions">
                 <button className="icon-btn" type="button" onClick={() => scrollToSection(mapSectionRef)}>🗺️</button>
                 <button className="icon-btn" type="button" onClick={() => scrollToSection(reportSectionRef)}>📣</button>
+                <button className={`profile-trigger ${profileOpen ? "is-open" : ""}`} type="button" onClick={() => setProfileOpen((open) => !open)} aria-expanded={profileOpen}>
+                  <span className="profile-avatar">{user?.name?.split(" ").map((part) => part[0]).join("").slice(0, 2) || "GU"}</span><span className="profile-chevron">⌄</span>
+                </button>
               </div>
             </div>
+            {profileOpen ? (
+              <div className="mobile-profile-menu">
+                <strong>{user?.name || "Guest operator"}</strong>
+                <span>{user?.agency || "SafeGuard Emergency Operations"}</span>
+                <span>{user?.role || "Citizen safety profile"} · Active session</span>
+                <button type="button" onClick={() => { setProfileOpen(false); logout(); }}>Sign out</button>
+              </div>
+            ) : null}
           </div>
 
           {topAlert ? (
@@ -795,6 +821,44 @@ export default function App() {
               <div>
                 <div className="eyebrow">Priority guidance</div>
                 <strong>Safe route guidance</strong>
+              </div>
+
+              <div className="section panel operational-panel">
+                <div className="section-head">
+                  <div><div className="eyebrow">Operational intelligence</div><strong>Risk and telemetry</strong></div>
+                  <Badge tone="warning">Live</Badge>
+                </div>
+                <div className="mobile-risk-list">
+                  {(dashboard.riskZones || []).map((zone) => (
+                    <div className={`mobile-risk-card risk-${riskTone(zone.riskScore)}`} key={zone.zoneId}>
+                      <div className="mobile-risk-head"><strong>{zone.zoneName}</strong><span className={`risk-badge risk-${trendTone(zone.trend)}`}>{zone.trend}</span></div>
+                      <p>{zone.prediction}</p>
+                      <div className="risk-progress"><span className={`risk-fill risk-fill-${riskTone(zone.riskScore)}`} style={{ width: `${zone.riskScore}%` }} /></div>
+                      <div className="mobile-risk-meta"><span>Risk {zone.riskScore}%</span><span>Confidence {Math.round(zone.confidence * 100)}%</span></div>
+                    </div>
+                  ))}
+                </div>
+                <div className="mobile-feed-list">
+                  {(dashboard.telemetry || []).map((item) => (
+                    <div className="mobile-telemetry-row" key={item.sourceId}>
+                      <div className="mobile-feed-title"><span className={`telemetry-signal signal-${item.riskBand}`} /><strong>{item.locationName}</strong><span className={`risk-badge risk-${item.riskBand}`}>{item.riskBand}</span></div>
+                      <small>{item.type}</small>
+                      <div className="telemetry-metrics">
+                        <TelemetryMetric label="AQI" value={item.airQualityIndex} tone={item.airQualityIndex >= 150 ? "critical" : ""} />
+                        <TelemetryMetric label="Flood" value={`${item.floodLevelM}m`} tone={item.floodLevelM >= 1.1 || item.floodLevelM >= 0.7 && item.riskBand === "critical" ? "critical" : ""} />
+                        <TelemetryMetric label="Temp" value={`${item.temperatureC}°C`} tone={item.temperatureC >= 43 ? "high" : ""} />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <div className="mobile-hospital-list">
+                  {(dashboard.hospitals || []).map((hospital) => (
+                    <div className="mobile-hospital-row" key={hospital.id}>
+                      <div><strong>{hospital.name}</strong><small>{hospital.emirate} · {hospital.availableBeds} beds free · ICU {hospital.icuAvailable}</small></div>
+                      <span><i className={`readiness-dot readiness-${readinessTone(hospital.occupancyPct)}`} />{hospital.occupancyPct}%</span>
+                    </div>
+                  ))}
+                </div>
               </div>
               <Badge tone={routeHint?.riskScore > 85 ? "critical" : "warning"}>{routeHint?.zoneName || "Local zone"}</Badge>
             </div>
