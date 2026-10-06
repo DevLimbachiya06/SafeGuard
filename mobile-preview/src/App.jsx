@@ -822,48 +822,52 @@ export default function App() {
                 <div className="eyebrow">Priority guidance</div>
                 <strong>Safe route guidance</strong>
               </div>
-
-              <div className="section panel operational-panel">
-                <div className="section-head">
-                  <div><div className="eyebrow">Operational intelligence</div><strong>Risk and telemetry</strong></div>
-                  <Badge tone="warning">Live</Badge>
-                </div>
-                <div className="mobile-risk-list">
-                  {(dashboard.riskZones || []).map((zone) => (
-                    <div className={`mobile-risk-card risk-${riskTone(zone.riskScore)}`} key={zone.zoneId}>
-                      <div className="mobile-risk-head"><strong>{zone.zoneName}</strong><span className={`risk-badge risk-${trendTone(zone.trend)}`}>{zone.trend}</span></div>
-                      <p>{zone.prediction}</p>
-                      <div className="risk-progress"><span className={`risk-fill risk-fill-${riskTone(zone.riskScore)}`} style={{ width: `${zone.riskScore}%` }} /></div>
-                      <div className="mobile-risk-meta"><span>Risk {zone.riskScore}%</span><span>Confidence {Math.round(zone.confidence * 100)}%</span></div>
-                    </div>
-                  ))}
-                </div>
-                <div className="mobile-feed-list">
-                  {(dashboard.telemetry || []).map((item) => (
-                    <div className="mobile-telemetry-row" key={item.sourceId}>
-                      <div className="mobile-feed-title"><span className={`telemetry-signal signal-${item.riskBand}`} /><strong>{item.locationName}</strong><span className={`risk-badge risk-${item.riskBand}`}>{item.riskBand}</span></div>
-                      <small>{item.type}</small>
-                      <div className="telemetry-metrics">
-                        <TelemetryMetric label="AQI" value={item.airQualityIndex} tone={item.airQualityIndex >= 150 ? "critical" : ""} />
-                        <TelemetryMetric label="Flood" value={`${item.floodLevelM}m`} tone={item.floodLevelM >= 1.1 || item.floodLevelM >= 0.7 && item.riskBand === "critical" ? "critical" : ""} />
-                        <TelemetryMetric label="Temp" value={`${item.temperatureC}°C`} tone={item.temperatureC >= 43 ? "high" : ""} />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                <div className="mobile-hospital-list">
-                  {(dashboard.hospitals || []).map((hospital) => (
-                    <div className="mobile-hospital-row" key={hospital.id}>
-                      <div><strong>{hospital.name}</strong><small>{hospital.emirate} · {hospital.availableBeds} beds free · ICU {hospital.icuAvailable}</small></div>
-                      <span><i className={`readiness-dot readiness-${readinessTone(hospital.occupancyPct)}`} />{hospital.occupancyPct}%</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
               <Badge tone={routeHint?.riskScore > 85 ? "critical" : "warning"}>{routeHint?.zoneName || "Local zone"}</Badge>
             </div>
-            <div className="route-copy">Avoid the highest risk corridor and keep open lanes for responders.</div>
+            <div className="route-summary">
+              <div className="route-summary-label">Recommended action</div>
+              <div className="route-copy">Avoid the highest risk corridor and keep open lanes for responders.</div>
+              <div className="route-meta"><span>Route risk</span><strong>{routeHint?.riskScore || 76}%</strong><span>ETA window</span><strong>{routeHint?.etaMinutes || 11} min</strong></div>
+            </div>
             <div className="route-line"><span style={{ width: `${routeLineWidth}%` }} /></div>
+          </div>
+
+          <div className="section panel operational-panel">
+            <div className="section-head">
+              <div><div className="eyebrow">Operational intelligence</div><strong>Risk and telemetry</strong></div>
+              <Badge tone="warning">Live</Badge>
+            </div>
+            <div className="mobile-risk-list">
+              {(dashboard.riskZones || []).map((zone) => (
+                <div className={`mobile-risk-card risk-${riskTone(zone.riskScore)}`} key={zone.zoneId}>
+                  <div className="mobile-risk-head"><strong>{zone.zoneName}</strong><span className={`risk-badge risk-${trendTone(zone.trend)}`}>{zone.trend}</span></div>
+                  <p>{zone.prediction}</p>
+                  <div className="risk-progress"><span className={`risk-fill risk-fill-${riskTone(zone.riskScore)}`} style={{ width: `${zone.riskScore}%` }} /></div>
+                  <div className="mobile-risk-meta"><span>Risk {zone.riskScore}%</span><span>Confidence {Math.round(zone.confidence * 100)}%</span></div>
+                </div>
+              ))}
+            </div>
+            <div className="mobile-feed-list">
+              {(dashboard.telemetry || []).map((item) => (
+                <div className="mobile-telemetry-row" key={item.sourceId}>
+                  <div className="mobile-feed-title"><span className={`telemetry-signal signal-${item.riskBand}`} /><strong>{item.locationName}</strong><span className={`risk-badge risk-${item.riskBand}`}>{item.riskBand}</span></div>
+                  <small>{item.type}</small>
+                  <div className="telemetry-metrics">
+                    <TelemetryMetric label="AQI" value={item.airQualityIndex} tone={item.airQualityIndex >= 150 ? "critical" : ""} />
+                    <TelemetryMetric label="Flood" value={`${item.floodLevelM}m`} tone={item.floodLevelM >= 1.1 || item.floodLevelM >= 0.7 && item.riskBand === "critical" ? "critical" : ""} />
+                    <TelemetryMetric label="Temp" value={`${item.temperatureC}°C`} tone={item.temperatureC >= 43 ? "high" : ""} />
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="mobile-hospital-list">
+              {(dashboard.hospitals || []).map((hospital) => (
+                <div className="mobile-hospital-row" key={hospital.id}>
+                  <div><strong>{hospital.name}</strong><small>{hospital.emirate} · {hospital.availableBeds} beds free · ICU {hospital.icuAvailable}</small></div>
+                  <span><i className={`readiness-dot readiness-${readinessTone(hospital.occupancyPct)}`} />{hospital.occupancyPct}%</span>
+                </div>
+              ))}
+            </div>
           </div>
 
           <div className="section panel">

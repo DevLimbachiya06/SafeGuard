@@ -724,6 +724,43 @@ button {
   background: linear-gradient(90deg, var(--accent-4), var(--accent-3), var(--accent));
 }
 
+.route-summary {
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid rgba(121, 169, 214, 0.16);
+  border-radius: 10px;
+  background: rgba(121, 169, 214, 0.06);
+}
+
+.route-summary-label,
+.route-meta {
+  color: var(--muted);
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 0.64rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.route-copy {
+  color: var(--text);
+  font-size: 0.84rem;
+  line-height: 1.45;
+}
+
+.route-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px 8px;
+  padding-top: 4px;
+  border-top: 1px solid rgba(143, 170, 208, 0.12);
+}
+
+.route-meta strong {
+  color: #c6d9ed;
+}
+
 .incident-list {
   display: grid;
   gap: 10px;
